@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cjvy6h27p17px"]
+
+[ext_resource type="Script" uid="uid://cvi2k7qg0lk08" path="res://scripts/managers/BridgeBuilder.gd" id="1_41ph0"]
+
+[node name="BridgeBuilder" type="Node2D"]
+script = ExtResource("1_41ph0")

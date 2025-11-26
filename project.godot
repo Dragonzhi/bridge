@@ -15,6 +15,10 @@ run/main_scene="uid://0nk3tfn6rk4s"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+GridManager="*res://scripts/managers/GridManager.gd"
+
 [display]
 
 window/size/viewport_width=384
