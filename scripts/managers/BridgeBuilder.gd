@@ -166,8 +166,8 @@ func _reset_build_mode():
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 
 func _create_bridge_segments():
-	# 我们不在管道本身的位置创建桥梁段
-	var segments_path = current_path.slice(1, current_path.size() - 2)
+	# 在管道本身的位置创建桥梁段
+	var segments_path = current_path
 	print("开始创建桥梁段，路径: ", segments_path)
 	
 	for grid_pos in segments_path:
