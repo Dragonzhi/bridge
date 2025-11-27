@@ -14,6 +14,9 @@ var current_path: Array[Vector2i] = []
 
 @onready var preview_line: Line2D = $PreviewLine
 
+# 用于存放桥梁段的容器节点
+@export var bridges_container: Node2D
+
 func _ready() -> void:
 	# 获取对全局管理器的引用
 	grid_manager = get_node("/root/Main/GridManager")
@@ -23,6 +26,9 @@ func _ready() -> void:
 	connection_manager = get_node("/root/Main/ConnectionManager")
 	if not connection_manager:
 		printerr("BridgeBuilder 错误: 找不到 ConnectionManager")
+
+	if not bridges_container:
+		printerr("BridgeBuilder 错误: 'bridges_container' 未设置！请在编辑器中指定。")
 
 	# 确保预览线在顶层渲染且不可见
 	preview_line.z_index = 1
@@ -123,16 +129,32 @@ func start_building(pipe: Pipe):
 	Input.set_default_cursor_shape(Input.CURSOR_CROSS)
 
 func _finish_building(end_pipe: Pipe):
+	print("--- 开始建造流程 ---")
+	print("初始路径: ", current_path)
+	# 在验证和建造之前，将终点管道的位置添加到路径中以完成连接
+	var end_grid_pos = grid_manager.world_to_grid(end_pipe.global_position)
+	if not current_path.has(end_grid_pos):
+		current_path.append(end_grid_pos)
+	print("最终路径: ", current_path)
+		
 	# 移除路径的起点和终点，因为我们只检查中间部分
 	var path_to_check = current_path.slice(1, current_path.size() - 2)
+	print("待检查的路径: ", path_to_check)
 
-	if grid_manager.is_grid_available(path_to_check):
+	var is_available = grid_manager.is_grid_available(path_to_check)
+	print("路径是否可用? ", is_available)
+
+	if is_available:
 		_create_bridge_segments()
 		connection_manager.add_connection(start_pipe, end_pipe)
+	else:
+		print("!!! 建造失败: 路径被阻挡")
 	
 	_reset_build_mode()
+	print("--- 建造流程结束 ---")
 
 func _cancel_building():
+	print("--- 建造取消 ---")
 	_reset_build_mode()
 
 func _reset_build_mode():
@@ -147,15 +169,22 @@ func _reset_build_mode():
 func _create_bridge_segments():
 	# 我们不在管道本身的位置创建桥梁段
 	var segments_path = current_path.slice(1, current_path.size() - 2)
+	print("开始创建桥梁段，路径: ", segments_path)
 	
 	for grid_pos in segments_path:
+		print("创建桥梁段于: ", grid_pos)
 		var bridge_segment = BridgeScene.instantiate()
 		var world_pos = grid_manager.grid_to_world(grid_pos)
 		
 		# 将新创建的节点添加到场景树中
-		get_node("/root/Main/Bridges").add_child(bridge_segment)
-		bridge_segment.global_position = world_pos
-		bridge_segment.setup_segment(grid_pos)
+		if bridges_container:
+			bridges_container.add_child(bridge_segment)
+			bridge_segment.global_position = world_pos
+			bridge_segment.setup_segment(grid_pos)
+		else:
+			printerr("无法创建桥梁段: 'bridges_container' 未在编辑器中指定!")
+	
+	print("桥梁段创建完毕")
 
 # --- 路径预览 ---
 

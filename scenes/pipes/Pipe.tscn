@@ -12,14 +12,12 @@ script = ExtResource("1_ho2yw")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 1
-position = Vector2(0, -8)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_ho2yw")
 
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-position = Vector2(0, -22)
 shape = SubResource("CapsuleShape2D_faeng")
 
 [connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]

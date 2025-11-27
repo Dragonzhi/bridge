@@ -8,7 +8,8 @@
 
 [node name="Main" type="Node2D"]
 
-[node name="BridgeBuilder" parent="." instance=ExtResource("4_abcde")]
+[node name="BridgeBuilder" parent="." node_paths=PackedStringArray("bridges_container") instance=ExtResource("4_abcde")]
+bridges_container = NodePath("../Midground/Bridges")
 
 [node name="PreviewLine" type="Line2D" parent="BridgeBuilder"]
 width = 5.0
@@ -16,8 +17,6 @@ default_color = Color(0.4, 0.5, 1, 0.5)
 
 [node name="ConnectionManager" type="Node" parent="."]
 script = ExtResource("5_fghij")
-
-[node name="Bridges" type="Node2D" parent="."]
 
 [node name="GridManager" parent="." instance=ExtResource("2_q24mn")]
 grid_size = 16
@@ -32,12 +31,16 @@ radius_range = Vector2(0.5, 2)
 
 [node name="Midground" type="Node2D" parent="."]
 
-[node name="Pipe2" parent="Midground" instance=ExtResource("1_nha0i")]
-position = Vector2(264, 5)
-rotation = 3.1415927
+[node name="Pipes" type="Node2D" parent="Midground"]
 
-[node name="Pipe" parent="Midground" instance=ExtResource("1_nha0i")]
+[node name="Pipe" parent="Midground/Pipes" instance=ExtResource("1_nha0i")]
 position = Vector2(312, 210)
+
+[node name="Pipe2" parent="Midground/Pipes" instance=ExtResource("1_nha0i")]
+position = Vector2(264, 5)
+rotation = -3.1415925
+
+[node name="Bridges" type="Node2D" parent="Midground"]
 
 [node name="Foreground" type="Node2D" parent="."]
 z_index = 100
