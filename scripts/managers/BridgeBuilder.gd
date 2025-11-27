@@ -36,15 +36,23 @@ func _unhandled_input(event: InputEvent) -> void:
 	# 鼠标移动时更新预览
 	if event is InputEventMouseMotion:
 		var new_grid_pos = grid_manager.world_to_grid(event.position)
+		var last_grid_pos = current_path.back() if not current_path.is_empty() else Vector2i(-1, -1)
 		
 		# 只有当鼠标进入新的格子时才更新路径
-		if new_grid_pos != current_path.back():
-			# 防止路径中出现重复的连续点
-			if current_path.has(new_grid_pos):
-				var idx = current_path.find(new_grid_pos)
-				current_path = current_path.slice(0, idx+1)
-			else:
-				current_path.append(new_grid_pos)
+		if new_grid_pos != last_grid_pos:
+			# 检查新位置是否与上一个位置相邻（水平或垂直）
+			var dx = abs(new_grid_pos.x - last_grid_pos.x)
+			var dy = abs(new_grid_pos.y - last_grid_pos.y)
+
+			if current_path.is_empty() or (dx <= 1 and dy <= 1 and (dx == 0 or dy == 0)):
+				# 如果是相邻的（水平或垂直），直接添加
+				_add_point_to_path(new_grid_pos)
+			elif dx > 1 or dy > 1:
+				# 如果跳过了格子，则进行插值填充
+				var interpolated_points = _interpolate_path(last_grid_pos, new_grid_pos)
+				for point in interpolated_points:
+					_add_point_to_path(point)
+			
 			_update_preview()
 
 	# 鼠标左键释放，尝试完成建造
@@ -58,6 +66,38 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			# 否则取消建造
 			_cancel_building()
+
+# --- 辅助函数：添加点到路径，并处理重复点 ---
+func _add_point_to_path(point: Vector2i):
+	if current_path.has(point):
+		# 如果点已经在路径中，截断路径到该点
+		var idx = current_path.find(point)
+		current_path = current_path.slice(0, idx + 1)
+	else:
+		# 如果点是新的，添加到路径末尾
+		current_path.append(point)
+
+# --- 辅助函数：插值填充路径（简化版，仅用于填补鼠标快速移动导致的跳格）---
+func _interpolate_path(start: Vector2i, end: Vector2i) -> Array[Vector2i]:
+	var interpolated_points: Array[Vector2i] = []
+	var dx = abs(end.x - start.x)
+	var dy = abs(end.y - start.y)
+
+	# 优先填补水平方向
+	if dx > dy:
+		var step_x = 1 if end.x > start.x else -1
+		for x in range(start.x + step_x, end.x + step_x, step_x):
+			interpolated_points.append(Vector2i(x, start.y))
+	# 然后填补垂直方向
+	else:
+		var step_y = 1 if end.y > start.y else -1
+		for y in range(start.y + step_y, end.y + step_y, step_y):
+			interpolated_points.append(Vector2i(start.x, y))
+	
+	# 这里只考虑了简单的直线插值。如果需要更复杂的斜线转直角线，需要更高级的算法。
+	# For now, this just fills in cardinal gaps.
+	return interpolated_points
+
 
 # --- 建造流程 ---
 
