@@ -16,14 +16,22 @@ enum PipeType {
 
 var is_connected_local: bool = false
 var grid_manager: GridManager
+var bridge_builder: BridgeBuilder
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# 获取GridManager引用
+	# 获取单例引用
 	grid_manager = get_node("/root/Main/GridManager")
+	bridge_builder = get_node("/root/Main/BridgeBuilder")
 	if not grid_manager:
-		print("错误: 找不到GridManager")
-	pass
+		printerr("错误: 找不到GridManager")
+	if not bridge_builder:
+		printerr("错误: 找不到BridgeBuilder")
+
+	# 在GridManager中注册自己的位置
+	var grid_pos = grid_manager.world_to_grid(global_position)
+	grid_manager.set_grid_occupied(grid_pos, self)
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 @warning_ignore("unused_parameter")
@@ -44,30 +52,15 @@ func on_connected():
 			pass
 			#SignalManager.activate_signal_zone(self)
 
-func get_pipe_under_mouse():
-	pass
-
 func _on_area_2d_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
-			print("鼠标左键按下 - 管道类型: ", pipe_type)
-			print("管道位置: ", global_position)
-			
-			# 显示网格
-			if grid_manager:
-				grid_manager.toggle_grid()
-			
-			# 显示网格坐标
-			var grid_pos = grid_manager.world_to_grid(global_position)
-			print("管道网格坐标: ", grid_pos)
-			
-			# 可以在这里添加高亮效果
-			sprite_2d.modulate = Color.YELLOW
-			
+			# 通知BridgeBuilder开始建造
+			if bridge_builder:
+				bridge_builder.start_building(self)
 		else:
-			#print("鼠标左键释放")
-			# 恢复原始颜色
-			sprite_2d.modulate = Color.WHITE
+			# 释放鼠标按钮的逻辑（如果需要的话）现在由BridgeBuilder处理
+			pass
 
 # 当鼠标进入管道区域时
 func _on_area_2d_mouse_entered() -> void:
@@ -76,6 +69,5 @@ func _on_area_2d_mouse_entered() -> void:
 
 # 当鼠标离开管道区域时
 func _on_area_2d_mouse_exited() -> void:
-	# 如果不是被点击状态，恢复原始颜色
-	#if not (Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)):
+	# 恢复原始颜色
 	sprite_2d.modulate = Color.WHITE
