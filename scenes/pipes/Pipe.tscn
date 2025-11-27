@@ -18,12 +18,13 @@ texture = ExtResource("2_ho2yw")
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+visible = false
 shape = SubResource("CapsuleShape2D_faeng")
 
 [node name="ConnectionPoints" type="Node2D" parent="."]
 
 [node name="ConnectionPoint1" type="Marker2D" parent="ConnectionPoints"]
-position = Vector2(0, -16)
+position = Vector2(0, -13)
 
 [node name="ConnectionPoint2" type="Marker2D" parent="ConnectionPoints"]
 position = Vector2(0, 8)

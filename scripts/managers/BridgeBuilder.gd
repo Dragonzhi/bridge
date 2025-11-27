@@ -149,9 +149,9 @@ func _finish_building(end_pipe: Pipe, end_pos: Vector2i):
 		_create_bridge_segments()
 		connection_manager.add_connection(start_pipe, end_pipe)
 		
-		# 标记连接点为已使用
-		start_pipe.mark_point_as_used(grid_manager.grid_to_world(start_pos))
-		end_pipe.mark_point_as_used(grid_manager.grid_to_world(end_pos))
+		# 标记管道为已使用
+		start_pipe.mark_pipe_as_used()
+		end_pipe.mark_pipe_as_used()
 	else:
 		print("!!! 建造失败: 路径被阻挡")
 	
