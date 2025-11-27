@@ -20,9 +20,9 @@ script = ExtResource("5_fghij")
 [node name="Bridges" type="Node2D" parent="."]
 
 [node name="GridManager" parent="." instance=ExtResource("2_q24mn")]
-grid_size = 8
-grid_width = 60
-grid_height = 60
+grid_size = 16
+grid_width = 50
+grid_height = 50
 
 [node name="BackGround" type="Node2D" parent="."]
 z_index = -100

@@ -35,12 +35,16 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	# 鼠标移动时更新预览
 	if event is InputEventMouseMotion:
-		var end_grid_pos = grid_manager.world_to_grid(event.position)
-		var start_grid_pos = grid_manager.world_to_grid(start_pipe.global_position)
+		var new_grid_pos = grid_manager.world_to_grid(event.position)
 		
-		# 只有当鼠标格子位置变化时才重新计算路径，优化性能
-		if end_grid_pos != current_path.back() if !current_path.is_empty() else start_grid_pos:
-			current_path = _find_path(start_grid_pos, end_grid_pos)
+		# 只有当鼠标进入新的格子时才更新路径
+		if new_grid_pos != current_path.back():
+			# 防止路径中出现重复的连续点
+			if current_path.has(new_grid_pos):
+				var idx = current_path.find(new_grid_pos)
+				current_path = current_path.slice(0, idx+1)
+			else:
+				current_path.append(new_grid_pos)
 			_update_preview()
 
 	# 鼠标左键释放，尝试完成建造
@@ -113,61 +117,3 @@ func _update_preview():
 		
 	for grid_pos in current_path:
 		preview_line.add_point(grid_manager.grid_to_world(grid_pos))
-
-# --- A* 寻路算法 ---
-
-# A* 启发式函数（曼哈顿距离）
-func _heuristic(a: Vector2i, b: Vector2i) -> int:
-	return abs(a.x - b.x) + abs(a.y - b.y)
-
-# A* 寻路主函数
-func _find_path(start_pos: Vector2i, end_pos: Vector2i) -> Array[Vector2i]:
-	var open_set: Array[Vector2i] = [start_pos]
-	var came_from: Dictionary = {}
-	
-	var g_score: Dictionary = {start_pos: 0}
-	var f_score: Dictionary = {start_pos: _heuristic(start_pos, end_pos)}
-
-	while not open_set.is_empty():
-		# 找到 open_set 中 f_score 最低的点
-		var current = open_set[0]
-		for node in open_set:
-			if f_score.get(node, INF) < f_score.get(current, INF):
-				current = node
-		
-		# 如果到达终点，重构路径并返回
-		if current == end_pos:
-			return _reconstruct_path(came_from, current)
-
-		open_set.erase(current)
-
-		# 探索邻居
-		for neighbor_offset in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
-			var neighbor = current + neighbor_offset
-			
-			# 检查邻居是否有效
-			if not grid_manager.is_within_bounds(neighbor):
-				continue
-			
-			# 如果邻居不是终点，且被占用，则跳过
-			if neighbor != end_pos and grid_manager.get_grid_object(neighbor) != null:
-				continue
-
-			var tentative_g_score = g_score.get(current, INF) + 1
-			if tentative_g_score < g_score.get(neighbor, INF):
-				came_from[neighbor] = current
-				g_score[neighbor] = tentative_g_score
-				f_score[neighbor] = tentative_g_score + _heuristic(neighbor, end_pos)
-				if not open_set.has(neighbor):
-					open_set.append(neighbor)
-	
-	# 如果找不到路径，返回空数组
-	return []
-
-# 从 came_from 字典重构路径
-func _reconstruct_path(came_from: Dictionary, current: Vector2i) -> Array[Vector2i]:
-	var total_path: Array[Vector2i] = [current]
-	while current in came_from:
-		current = came_from[current]
-		total_path.push_front(current)
-	return total_path
