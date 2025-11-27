@@ -69,6 +69,15 @@ func _unhandled_input(event: InputEvent) -> void:
 
 # --- 辅助函数：添加点到路径，并处理重复点 ---
 func _add_point_to_path(point: Vector2i):
+	# 检查新点是否在边界内
+	if not grid_manager.is_within_bounds(point):
+		return # 如果超出边界，则不添加
+
+	# 检查单元格是否被起始管道以外的任何其他物体占用
+	var existing_object = grid_manager.get_grid_object(point)
+	if existing_object != null and existing_object != start_pipe:
+		return # 如果被起始管道以外的物体占用，则不添加
+
 	if current_path.has(point):
 		# 如果点已经在路径中，截断路径到该点
 		var idx = current_path.find(point)
