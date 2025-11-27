@@ -68,7 +68,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 		if target_node is Pipe and target_node != start_pipe:
 			# 如果是有效的管道，完成建造
-			_finish_building(target_node)
+			_finish_building(target_node, grid_pos)
 		else:
 			# 否则取消建造
 			_cancel_building()
@@ -116,25 +116,24 @@ func _interpolate_path(start: Vector2i, end: Vector2i) -> Array[Vector2i]:
 
 # --- 建造流程 ---
 
-func start_building(pipe: Pipe):
+func start_building(pipe: Pipe, start_pos: Vector2i):
 	if build_mode:
 		return
 	
 	build_mode = true
 	start_pipe = pipe
-	current_path = [grid_manager.world_to_grid(start_pipe.global_position)]
+	current_path = [start_pos]
 	
 	preview_line.visible = true
 	grid_manager.show_grid()
 	Input.set_default_cursor_shape(Input.CURSOR_CROSS)
 
-func _finish_building(end_pipe: Pipe):
+func _finish_building(end_pipe: Pipe, end_pos: Vector2i):
 	print("--- 开始建造流程 ---")
 	print("初始路径: ", current_path)
 	# 在验证和建造之前，将终点管道的位置添加到路径中以完成连接
-	var end_grid_pos = grid_manager.world_to_grid(end_pipe.global_position)
-	if not current_path.has(end_grid_pos):
-		current_path.append(end_grid_pos)
+	if not current_path.has(end_pos):
+		current_path.append(end_pos)
 	print("最终路径: ", current_path)
 		
 	# 移除路径的起点和终点，因为我们只检查中间部分

@@ -3,6 +3,7 @@ class_name Pipe
 
 @onready var sprite_2d: Sprite2D = $Sprite2D
 @onready var area_2d: Area2D = $Area2D
+@onready var connection_points: Node2D = $ConnectionPoints
 
 enum PipeType {
 	LIFE,
@@ -28,10 +29,12 @@ func _ready() -> void:
 	if not bridge_builder:
 		printerr("错误: 找不到BridgeBuilder")
 
-	# 在GridManager中注册自己的位置
-	var grid_pos = grid_manager.world_to_grid(global_position)
-	grid_manager.set_grid_occupied(grid_pos, self)
-
+	# 在GridManager中注册所有连接点的位置
+	if connection_points:
+		for point in connection_points.get_children():
+			if point is Marker2D:
+				var grid_pos = grid_manager.world_to_grid(point.global_position)
+				grid_manager.set_grid_occupied(grid_pos, self)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 @warning_ignore("unused_parameter")
@@ -55,12 +58,31 @@ func on_connected():
 func _on_area_2d_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
-			# 通知BridgeBuilder开始建造
-			if bridge_builder:
-				bridge_builder.start_building(self)
+			# 找到最近的连接点
+			var closest_point = _get_closest_connection_point(event.global_position)
+			if closest_point:
+				var start_grid_pos = grid_manager.world_to_grid(closest_point.global_position)
+				# 通知BridgeBuilder开始建造
+				if bridge_builder:
+					bridge_builder.start_building(self, start_grid_pos)
 		else:
 			# 释放鼠标按钮的逻辑（如果需要的话）现在由BridgeBuilder处理
 			pass
+
+# 找到离给定世界坐标最近的连接点
+func _get_closest_connection_point(pos: Vector2) -> Marker2D:
+	var closest_point: Marker2D = null
+	var min_dist_sq = INF
+	
+	if connection_points:
+		for point in connection_points.get_children():
+			if point is Marker2D:
+				var dist_sq = pos.distance_squared_to(point.global_position)
+				if dist_sq < min_dist_sq:
+					min_dist_sq = dist_sq
+					closest_point = point
+	
+	return closest_point
 
 # 当鼠标进入管道区域时
 func _on_area_2d_mouse_entered() -> void:

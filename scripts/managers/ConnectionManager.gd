@@ -23,7 +23,7 @@ func add_connection(pipe1: Pipe, pipe2: Pipe):
 	
 	print("连接已注册: ", pipe1.name, " <-> ", pipe2.name)
 
-# 移除一个连接（如果需要）
+# 移除一个连接
 func remove_connection(pipe1: Pipe, pipe2: Pipe):
 	var id1 = pipe1.get_instance_id()
 	var id2 = pipe2.get_instance_id()

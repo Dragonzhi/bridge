@@ -84,6 +84,7 @@ func world_to_grid(world_pos: Vector2) -> Vector2i:
 
 # 网格坐标转换为世界坐标
 func grid_to_world(grid_pos: Vector2i) -> Vector2:
+	@warning_ignore("integer_division")
 	return Vector2(
 		grid_pos.x * grid_size + grid_size / 2,
 		grid_pos.y * grid_size + grid_size / 2
