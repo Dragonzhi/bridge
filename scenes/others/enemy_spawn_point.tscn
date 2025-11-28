@@ -1,9 +1,21 @@
-[gd_scene load_steps=2 format=3 uid="uid://dbitchmue8nm6"]
+[gd_scene load_steps=4 format=3 uid="uid://dbitchmue8nm6"]
 
 [ext_resource type="Texture2D" uid="uid://i2s4wdd4g1te" path="res://assets/others/EnemySpawnPoint_png.png" id="1_2jexi"]
+[ext_resource type="Script" uid="uid://bxedniuishsad" path="res://scripts/others/enemy_spawn_point.gd" id="1_kfxof"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_2jexi"]
+radius = 12.0
 
 [node name="EnemySpawnPoint" type="Node2D"]
+script = ExtResource("1_kfxof")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("1_2jexi")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("CircleShape2D_2jexi")
+
+[node name="Marker2D" type="Marker2D" parent="."]
