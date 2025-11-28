@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://0nk3tfn6rk4s"]
+[gd_scene load_steps=9 format=3 uid="uid://0nk3tfn6rk4s"]
 
 [ext_resource type="PackedScene" uid="uid://bwc7siyf2lmfb" path="res://scenes/pipes/Pipe.tscn" id="1_nha0i"]
 [ext_resource type="PackedScene" uid="uid://h6j8i84x74hj" path="res://scenes/others/GridManager.tscn" id="2_q24mn"]
@@ -6,6 +6,13 @@
 [ext_resource type="PackedScene" uid="uid://dbitchmue8nm6" path="res://scenes/others/enemy_spawn_point.tscn" id="4_1rhdn"]
 [ext_resource type="PackedScene" uid="uid://cjvy6h27p17px" path="res://scenes/others/BridgeBuilder.tscn" id="4_abcde"]
 [ext_resource type="Script" uid="uid://b2n0qw8vqfgsl" path="res://scripts/managers/ConnectionManager.gd" id="5_fghij"]
+[ext_resource type="PackedScene" uid="uid://cm325e0w41j3h" path="res://scenes/entities/BaseEnemy.tscn" id="5_sjxhf"]
+
+[sub_resource type="Curve2D" id="Curve2D_sjxhf"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80, 80, 0, 0, 0, 0, 110, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 4
 
 [node name="Main" type="Node2D"]
 
@@ -29,6 +36,10 @@ radius_range = Vector2(0.5, 2)
 
 [node name="EnemySpawnPoint" parent="BackGround/EnemySpawns" instance=ExtResource("4_1rhdn")]
 position = Vector2(160, 48)
+enemy_scene = ExtResource("5_sjxhf")
+
+[node name="Path" parent="BackGround/EnemySpawns/EnemySpawnPoint" index="3"]
+curve = SubResource("Curve2D_sjxhf")
 
 [node name="Midground" type="Node2D" parent="."]
 
@@ -65,3 +76,5 @@ bridges_container = NodePath("../Midground/Bridges")
 [node name="PreviewLine" type="Line2D" parent="BridgeBuilder"]
 width = 5.0
 default_color = Color(0.4, 0.5, 1, 0.5)
+
+[editable path="BackGround/EnemySpawns/EnemySpawnPoint"]

@@ -1,13 +1,43 @@
 extends Node2D
 
+@export var enemy_scene: PackedScene
+
 var grid_manager: GridManager
 @onready var collision_shape: CollisionShape2D = $Area2D/CollisionShape2D
+@onready var path_node: Path2D = $Path
+@onready var spawn_timer: Timer = $SpawnTimer
 
 # 节点进入场景树时首次调用。
 func _ready() -> void:
 	# 延迟执行占用逻辑到下一帧，确保GridManager已准备就绪
 	# 并且全局位置准确。
 	call_deferred("_register_occupied_cells")
+	
+	# 连接计时器的timeout信号
+	if spawn_timer:
+		spawn_timer.timeout.connect(spawn_enemy)
+
+func spawn_enemy():
+	if not enemy_scene:
+		printerr("敌人生成点错误: 未在编辑器中设置 'Enemy Scene'！")
+		return
+	
+	if not path_node:
+		printerr("敌人生成点错误: 未找到名为 'Path' 的Path2D子节点！")
+		return
+	
+	var enemy_instance = enemy_scene.instantiate()
+	
+	# 确保实例是一个可以调用set_path的对象
+	if enemy_instance.has_method("set_path"):
+		enemy_instance.set_path(path_node)
+	else:
+		printerr("生成错误: 'enemy_scene' 没有 'set_path' 方法。")
+		return
+
+	# 将敌人添加到场景的根节点下（或一个专门的容器下）
+	get_tree().root.add_child(enemy_instance)
+	print("一个敌人已被生成！")
 
 func _register_occupied_cells():
 	grid_manager = get_node("/root/Main/GridManager")
