@@ -28,16 +28,11 @@ func spawn_enemy():
 	
 	var enemy_instance = enemy_scene.instantiate()
 	
-	# 确保实例是一个可以调用set_path的对象
-	if enemy_instance.has_method("set_path"):
-		enemy_instance.set_path(path_node)
-	else:
-		printerr("生成错误: 'enemy_scene' 没有 'set_path' 方法。")
-		return
-
-	# 将敌人添加到场景的根节点下（或一个专门的容器下）
-	get_tree().root.add_child(enemy_instance)
-	print("一个敌人已被生成！")
+	# PathFollow2D通过成为Path2D的子节点来工作
+	# 我们直接将敌人实例添加到路径节点下
+	path_node.add_child(enemy_instance)
+	
+	print("一个敌人已被生成到路径上！")
 
 func _register_occupied_cells():
 	grid_manager = get_node("/root/Main/GridManager")

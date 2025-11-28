@@ -6,12 +6,14 @@
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_21t3f"]
 height = 24.0
 
-[node name="BaseEnemy" type="CharacterBody2D"]
+[node name="BaseEnemy" type="PathFollow2D"]
 script = ExtResource("1_w51s3")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_l6aj4")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("CapsuleShape2D_21t3f")
