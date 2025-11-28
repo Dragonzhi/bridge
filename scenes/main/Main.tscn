@@ -21,6 +21,7 @@ grid_height = 50
 z_index = -100
 
 [node name="ParticleBackground" parent="BackGround" instance=ExtResource("3_u1xfj")]
+self_modulate = Color(1, 1, 1, 0.29411766)
 radius_range = Vector2(0.5, 2)
 
 [node name="Midground" type="Node2D" parent="."]
@@ -30,21 +31,21 @@ radius_range = Vector2(0.5, 2)
 [node name="Red" type="Node2D" parent="Midground/Pipes"]
 
 [node name="redPipe1" parent="Midground/Pipes/Red" instance=ExtResource("1_nha0i")]
-position = Vector2(312, 210)
+position = Vector2(312, 218)
 
 [node name="redPipe2" parent="Midground/Pipes/Red" instance=ExtResource("1_nha0i")]
 position = Vector2(264, 5)
-rotation = -3.1415925
+rotation = -3.14159
 
 [node name="Blue" type="Node2D" parent="Midground/Pipes"]
 
 [node name="bluePipe1" parent="Midground/Pipes/Blue" instance=ExtResource("1_nha0i")]
-position = Vector2(88, 210)
+position = Vector2(88, 203)
 pipe_type = 1
 
 [node name="bluePipe2" parent="Midground/Pipes/Blue" instance=ExtResource("1_nha0i")]
-position = Vector2(0, 56)
-rotation = 1.5707964
+position = Vector2(4, 56)
+rotation = 1.5708
 pipe_type = 1
 
 [node name="Bridges" type="Node2D" parent="Midground"]

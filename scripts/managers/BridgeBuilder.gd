@@ -80,11 +80,6 @@ func _add_point_to_path(point: Vector2i):
 	if not grid_manager.is_within_bounds(point):
 		return # 如果超出边界，则不添加
 
-	# 检查单元格是否被起始管道以外的任何其他物体占用
-	var existing_object = grid_manager.get_grid_object(point)
-	if existing_object != null and existing_object != start_pipe:
-		return # 如果被起始管道以外的物体占用，则不添加
-
 	if current_path.has(point):
 		# 如果点已经在路径中，截断路径到该点
 		var idx = current_path.find(point)
@@ -139,7 +134,7 @@ func _finish_building(end_pipe: Pipe, end_pos: Vector2i):
 	print("最终路径: ", current_path)
 		
 	# 移除路径的起点和终点，因为我们只检查中间部分
-	var path_to_check = current_path.slice(1, current_path.size() - 2)
+	var path_to_check = current_path.slice(1, current_path.size() - 1)
 	print("待检查的路径: ", path_to_check)
 
 	var is_available = grid_manager.is_grid_available(path_to_check)
