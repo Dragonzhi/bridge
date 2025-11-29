@@ -1,7 +1,8 @@
-[gd_scene load_steps=30 format=3 uid="uid://de0pjmcrfoc5m"]
+[gd_scene load_steps=37 format=3 uid="uid://de0pjmcrfoc5m"]
 
 [ext_resource type="Script" uid="uid://nq74hij6o8fv" path="res://scenes/bridge/bridge.gd" id="1_c301t"]
 [ext_resource type="Texture2D" uid="uid://d35j2wd643idj" path="res://assets/bridge/bridge-sheet.png" id="2_ll4hc"]
+[ext_resource type="Texture2D" uid="uid://cc64e7rt4tt6v" path="res://assets/bridge/bridge_sheet.png" id="3_v3gq5"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_v3gq5"]
 atlas = ExtResource("2_ll4hc")
@@ -80,28 +81,52 @@ atlas = ExtResource("2_ll4hc")
 region = Rect2(384, 128, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jnwta"]
-atlas = ExtResource("2_ll4hc")
+atlas = ExtResource("3_v3gq5")
 region = Rect2(128, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bqf5l"]
-atlas = ExtResource("2_ll4hc")
-region = Rect2(128, 256, 128, 128)
+atlas = ExtResource("3_v3gq5")
+region = Rect2(128, 384, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0opcs"]
-atlas = ExtResource("2_ll4hc")
-region = Rect2(128, 512, 128, 128)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_xo3fo"]
-atlas = ExtResource("2_ll4hc")
+atlas = ExtResource("3_v3gq5")
 region = Rect2(128, 768, 128, 128)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_xo3fo"]
+atlas = ExtResource("3_v3gq5")
+region = Rect2(128, 1152, 128, 128)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_xr3tc"]
-atlas = ExtResource("2_ll4hc")
-region = Rect2(128, 1024, 128, 128)
+atlas = ExtResource("3_v3gq5")
+region = Rect2(128, 1536, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yduyu"]
-atlas = ExtResource("2_ll4hc")
+atlas = ExtResource("3_v3gq5")
 region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kjnkn"]
+atlas = ExtResource("3_v3gq5")
+region = Rect2(0, 256, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wxdfo"]
+atlas = ExtResource("3_v3gq5")
+region = Rect2(0, 640, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d1w72"]
+atlas = ExtResource("3_v3gq5")
+region = Rect2(0, 1024, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ttjp0"]
+atlas = ExtResource("3_v3gq5")
+region = Rect2(0, 1408, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_73veu"]
+atlas = ExtResource("3_v3gq5")
+region = Rect2(0, 1792, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0lp6u"]
+atlas = ExtResource("3_v3gq5")
+region = Rect2(256, 256, 128, 128)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_jgw5d"]
 animations = [{
@@ -196,6 +221,29 @@ animations = [{
 "loop": false,
 "name": &"四向",
 "speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kjnkn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wxdfo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d1w72")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ttjp0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_73veu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0lp6u")
+}],
+"loop": false,
+"name": &"拐角",
+"speed": 5.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ll4hc"]
@@ -214,7 +262,7 @@ vframes = 10
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(0.125, 0.125)
 sprite_frames = SubResource("SpriteFrames_jgw5d")
-animation = &"四向"
+animation = &"拐角"
 autoplay = "四向"
 
 [node name="Area2D" type="Area2D" parent="."]

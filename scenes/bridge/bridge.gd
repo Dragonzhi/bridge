@@ -9,12 +9,12 @@ class_name Bridge
 
 var current_health: float
 var grid_manager: GridManager
-var grid_pos: Vector2i # 存储该桥段在网格中的位置
+var grid_pos: Vector2i
 var is_destroyed: bool = false
+var tile_animation_name: String # 存储正确的瓦片动画名称
 
 signal bridge_selected(bridge: Bridge)
 
-# 节点首次进入场景树时调用。
 func _ready() -> void:
 	current_health = max_health
 	grid_manager = get_node("/root/Main/GridManager")
@@ -27,13 +27,11 @@ func setup_segment(grid_pos: Vector2i):
 	self.grid_pos = grid_pos
 	if not grid_manager:
 		grid_manager = get_node("/root/Main/GridManager")
-
 	if grid_manager:
 		grid_manager.set_grid_occupied(grid_pos, self)
 	else:
 		printerr("无法注册桥梁段: 找不到GridManager")
 
-# 根据邻居信息设置桥梁瓦片样式和旋转
 func setup_bridge_tile(neighbors: Dictionary):
 	var has_north = neighbors.get("north", false)
 	var has_south = neighbors.get("south", false)
@@ -44,71 +42,60 @@ func setup_bridge_tile(neighbors: Dictionary):
 	
 	match connection_count:
 		4:
-			animated_sprite.animation = "四向"
+			tile_animation_name = "四向"
 		3:
-			animated_sprite.animation = "三向"
-			if not has_west: # 默认样式: N, E, S
-				animated_sprite.rotation_degrees = 0
-			elif not has_north: # W, E, S
-				animated_sprite.rotation_degrees = 90
-			elif not has_east: # N, W, S
-				animated_sprite.rotation_degrees = 180
-			elif not has_south: # N, W, E
-				animated_sprite.rotation_degrees = 270
+			tile_animation_name = "三向"
+			if not has_west: animated_sprite.rotation_degrees = 0
+			elif not has_north: animated_sprite.rotation_degrees = 90
+			elif not has_east: animated_sprite.rotation_degrees = 180
+			elif not has_south: animated_sprite.rotation_degrees = 270
 		2:
 			# 二向: 直线或拐角
 			if (has_north and has_south): # 直线 (垂直)
-				animated_sprite.animation = "二向"
+				tile_animation_name = "二向"
 				animated_sprite.rotation_degrees = 0
 			elif (has_east and has_west): # 直线 (水平)
-				animated_sprite.animation = "二向"
+				tile_animation_name = "二向"
 				animated_sprite.rotation_degrees = 90
 			else: # 拐角
-				# 假设 "二向" 是一个拐角瓦片, 默认朝向南-东
-				# 这里需要一个专门的拐角动画，暂时用 "二向" 代替
-				# print("警告: 缺少拐角专用的桥梁动画，使用'二向'代替。")
-				animated_sprite.animation = "二向" 
-				if has_south and has_east: # S-E corner
+				tile_animation_name = "拐角" 
+				# 默认 "拐角" 连接北和东
+				if has_north and has_east:
 					animated_sprite.rotation_degrees = 0
-				elif has_south and has_west: # S-W corner
+				elif has_south and has_east:
 					animated_sprite.rotation_degrees = 90
-				elif has_north and has_west: # N-W corner
+				elif has_south and has_west:
 					animated_sprite.rotation_degrees = 180
-				elif has_north and has_east: # N-E corner
+				elif has_north and has_west:
 					animated_sprite.rotation_degrees = 270
 		1:
-			animated_sprite.animation = "单向"
-			if has_south:
-				animated_sprite.rotation_degrees = 0
-			elif has_west:
-				animated_sprite.rotation_degrees = 90
-			elif has_north:
-				animated_sprite.rotation_degrees = 180
-			elif has_east:
-				animated_sprite.rotation_degrees = 270
+			tile_animation_name = "单向"
+			if has_south: animated_sprite.rotation_degrees = 0
+			elif has_west: animated_sprite.rotation_degrees = 90
+			elif has_north: animated_sprite.rotation_degrees = 180
+			elif has_east: animated_sprite.rotation_degrees = 270
 		_:
-			# 0个或未知数量的连接，可能只在路径的起点/终点发生
-			# 可以设置一个默认或隐藏
-			animated_sprite.animation = "单向"
+			tile_animation_name = "单向"
+	
+	animated_sprite.animation = tile_animation_name
 
 func take_damage(amount: float):
-	if is_destroyed:
-		return
-
+	if is_destroyed: return
 	current_health -= amount
 	print("桥段 %s 受到 %s点伤害, 剩余生命值: %s" % [grid_pos, amount, current_health])
-
 	if current_health <= 0:
-		current_health = 0
-		is_destroyed = true
-		animated_sprite.modulate = Color(0.2, 0.2, 0.2) # 变暗表示损坏
-		print("桥段 %s 已被摧毁！" % grid_pos)
-
+				current_health = 0
+				is_destroyed = true
+				animated_sprite.modulate = Color(0.4, 0.4, 0.4) # 变暗表示损坏，但更可见
+				animated_sprite.stop()
+				print("桥段 %s 已被摧毁！" % grid_pos)
 func repair():
 	print("桥段 %s 已修复！" % grid_pos)
 	is_destroyed = false
 	current_health = max_health
 	animated_sprite.modulate = Color.WHITE
+	animated_sprite.animation = tile_animation_name # 恢复正确的静态帧
+	animated_sprite.frame = animated_sprite.sprite_frames.get_frame_count(tile_animation_name) - 1 # 显示最后一帧
 
 func _on_area_2d_mouse_entered() -> void:
 	if not is_destroyed and repair_timer.is_stopped():
@@ -123,8 +110,9 @@ func _on_area_2d_input_event(viewport: Node, event: InputEvent, shape_idx: int) 
 		if is_destroyed and repair_timer.is_stopped():
 			print("开始修理桥段 %s..." % grid_pos)
 			animated_sprite.modulate = Color(0.2, 0.5, 1.0)
+			animated_sprite.animation = tile_animation_name # 播放正确的动画
+			animated_sprite.play() # 开始播放修理动画
 			repair_timer.start()
 		elif not is_destroyed:
 			emit_signal("bridge_selected", self)
-		
 		get_viewport().set_input_as_handled()
