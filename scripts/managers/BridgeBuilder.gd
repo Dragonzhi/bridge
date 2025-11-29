@@ -35,6 +35,9 @@ func _ready() -> void:
 	preview_line.z_index = 1
 	preview_line.visible = false
 
+	# 连接到SceneTree的mouse_exited信号，以便在鼠标离开窗口时取消建造
+	get_tree().get_root().mouse_exited.connect(_on_mouse_exited)
+
 # 主输入处理
 func _unhandled_input(event: InputEvent) -> void:
 	if not build_mode:
@@ -191,6 +194,13 @@ func _create_bridge_segments():
 			printerr("无法创建桥梁段: 'bridges_container' 未在编辑器中指定!")
 	
 	print("桥梁段创建完毕")
+
+func _on_mouse_exited():
+	# 如果在建造模式下鼠标离开了窗口，则取消建造
+	if build_mode:
+		print("鼠标移出窗口，建造取消。")
+		_cancel_building()
+
 
 # --- 路径预览 ---
 
