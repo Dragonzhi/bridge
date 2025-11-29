@@ -214,7 +214,8 @@ vframes = 10
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(0.125, 0.125)
 sprite_frames = SubResource("SpriteFrames_jgw5d")
-animation = &"三向"
+animation = &"四向"
+autoplay = "四向"
 
 [node name="Area2D" type="Area2D" parent="."]
 

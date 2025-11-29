@@ -170,21 +170,32 @@ func _reset_build_mode():
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 
 func _create_bridge_segments():
-	# 使用Dictionary以提高邻居查找效率
-	var path_set = {}
-	for pos in current_path:
-		path_set[pos] = true
+	if current_path.size() < 2:
+		return # 路径太短，无法创建桥梁
 
+	# 为了进行邻居检查，我们需要一个包含所有连接点的集合，
+	# 包括管道背后的“虚拟”点。
+	var full_connection_set = {}
+	for pos in current_path:
+		full_connection_set[pos] = true
+	
+	# 添加起始管道背后的虚拟点
+	var start_dir = (current_path[0] - current_path[1])
+	full_connection_set[current_path[0] + start_dir] = true
+	
+	# 添加末端管道背后的虚拟点
+	var end_dir = (current_path.back() - current_path[current_path.size() - 2])
+	full_connection_set[current_path.back() + end_dir] = true
+
+	# 现在为路径中的每个真实点创建桥梁段
 	for grid_pos in current_path:
-		# 1. 确定邻居
 		var neighbors = {
-			"north": path_set.has(grid_pos + Vector2i.UP),
-			"south": path_set.has(grid_pos + Vector2i.DOWN),
-			"east": path_set.has(grid_pos + Vector2i.RIGHT),
-			"west": path_set.has(grid_pos + Vector2i.LEFT)
+			"north": full_connection_set.has(grid_pos + Vector2i.UP),
+			"south": full_connection_set.has(grid_pos + Vector2i.DOWN),
+			"east": full_connection_set.has(grid_pos + Vector2i.RIGHT),
+			"west": full_connection_set.has(grid_pos + Vector2i.LEFT)
 		}
 		
-		# 2. 实例化桥梁
 		var bridge_segment = BridgeScene.instantiate()
 		var world_pos = grid_manager.grid_to_world(grid_pos)
 		
@@ -195,10 +206,9 @@ func _create_bridge_segments():
 		bridges_container.add_child(bridge_segment)
 		bridge_segment.global_position = world_pos
 		
-		# 3. 连接信号并设置瓦片
 		bridge_segment.bridge_selected.connect(ui_manager._on_bridge_selected)
-		bridge_segment.setup_segment(grid_pos) # 注册到网格
-		bridge_segment.setup_bridge_tile(neighbors) # 设置正确的样式
+		bridge_segment.setup_segment(grid_pos)
+		bridge_segment.setup_bridge_tile(neighbors)
 
 	print("桥梁段创建完毕")
 
