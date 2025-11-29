@@ -113,8 +113,6 @@ func _interpolate_path(start: Vector2i, end: Vector2i) -> Array[Vector2i]:
 		for y in range(start.y + step_y, end.y + step_y, step_y):
 			interpolated_points.append(Vector2i(start.x, y))
 	
-	# 这里只考虑了简单的直线插值。如果需要更复杂的斜线转直角线，需要更高级的算法。
-	# For now, this just fills in cardinal gaps.
 	return interpolated_points
 
 
@@ -135,30 +133,21 @@ func start_building(pipe: Pipe, start_pos: Vector2i):
 
 func _finish_building(end_pipe: Pipe, end_pos: Vector2i):
 	print("--- 开始建造流程 ---")
-	print("初始路径: ", current_path)
-	# 在验证和建造之前，将终点管道的位置添加到路径中以完成连接
 	if not current_path.has(end_pos):
 		current_path.append(end_pos)
-	print("最终路径: ", current_path)
 		
-	# 移除路径的起点和终点，因为我们只检查中间部分
 	var path_to_check = current_path.slice(1, current_path.size() - 1)
-	print("待检查的路径: ", path_to_check)
-
 	var is_available = grid_manager.is_grid_available(path_to_check)
-	print("路径是否可用? ", is_available)
 
 	if is_available:
-		# 检查管道类型是否匹配
 		if start_pipe.pipe_type != end_pipe.pipe_type:
-			printerr("管道类型不匹配！无法连接 ", start_pipe.pipe_type, " 到 ", end_pipe.pipe_type)
+			printerr("管道类型不匹配！")
 			_cancel_building()
 			return
 			
 		_create_bridge_segments()
 		connection_manager.add_connection(start_pipe, end_pipe)
 		
-		# 标记管道为已使用
 		start_pipe.mark_pipe_as_used()
 		end_pipe.mark_pipe_as_used()
 	else:
@@ -181,28 +170,39 @@ func _reset_build_mode():
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 
 func _create_bridge_segments():
-	# 在管道本身的位置创建桥梁段
-	var segments_path = current_path
-	print("开始创建桥梁段，路径: ", segments_path)
-	
-	for grid_pos in segments_path:
-		print("创建桥梁段于: ", grid_pos)
+	# 使用Dictionary以提高邻居查找效率
+	var path_set = {}
+	for pos in current_path:
+		path_set[pos] = true
+
+	for grid_pos in current_path:
+		# 1. 确定邻居
+		var neighbors = {
+			"north": path_set.has(grid_pos + Vector2i.UP),
+			"south": path_set.has(grid_pos + Vector2i.DOWN),
+			"east": path_set.has(grid_pos + Vector2i.RIGHT),
+			"west": path_set.has(grid_pos + Vector2i.LEFT)
+		}
+		
+		# 2. 实例化桥梁
 		var bridge_segment = BridgeScene.instantiate()
-		bridge_segment.bridge_selected.connect(ui_manager._on_bridge_selected)
 		var world_pos = grid_manager.grid_to_world(grid_pos)
 		
-		# 将新创建的节点添加到场景树中
-		if bridges_container:
-			bridges_container.add_child(bridge_segment)
-			bridge_segment.global_position = world_pos
-			bridge_segment.setup_segment(grid_pos)
-		else:
+		if not bridges_container:
 			printerr("无法创建桥梁段: 'bridges_container' 未在编辑器中指定!")
-	
+			return
+
+		bridges_container.add_child(bridge_segment)
+		bridge_segment.global_position = world_pos
+		
+		# 3. 连接信号并设置瓦片
+		bridge_segment.bridge_selected.connect(ui_manager._on_bridge_selected)
+		bridge_segment.setup_segment(grid_pos) # 注册到网格
+		bridge_segment.setup_bridge_tile(neighbors) # 设置正确的样式
+
 	print("桥梁段创建完毕")
 
 func _on_mouse_exited():
-	# 如果在建造模式下鼠标离开了窗口，则取消建造
 	if build_mode:
 		print("鼠标移出窗口，建造取消。")
 		_cancel_building()
