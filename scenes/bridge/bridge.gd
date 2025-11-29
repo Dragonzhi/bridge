@@ -6,19 +6,30 @@ class_name Bridge
 @onready var sprite: Sprite2D = $Sprite2D
 
 @export var max_health: float = 100.0
-@export var current_health: float
-@export var defense: float = 10.0
+var current_health: float
 
 var grid_manager: GridManager
 var grid_pos: Vector2i # 存储该桥段在网格中的位置
 
-# Called when the node enters the scene tree for the first time.
+# 节点首次进入场景树时调用。
 func _ready() -> void:
 	current_health = max_health
-	
 	grid_manager = get_node("/root/Main/GridManager")
 	if not grid_manager:
 		printerr("错误: 找不到GridManager")
+
+func take_damage(amount: float):
+	if current_health <= 0:
+		return # 桥段已损坏，不再接受伤害
+
+	current_health -= amount
+	print("桥段 %s 受到 %s点伤害, 剩余生命值: %s" % [grid_pos, amount, current_health])
+
+	if current_health <= 0:
+		current_health = 0
+		sprite.modulate = Color(0.2, 0.2, 0.2) # 变暗表示损坏
+		print("桥段 %s 已被摧毁！" % grid_pos)
+
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

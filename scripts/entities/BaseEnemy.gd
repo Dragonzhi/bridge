@@ -3,16 +3,18 @@ class_name BaseEnemy
 
 @export var max_hp: float = 100.0 ## 最大生命值/冷静值
 @export var current_hp: float = 100.0 ## 当前生命值/冷静值
-@export var move_speed: float = 50.0 ## 移动速度 (单位/秒)
-@export var attack_power : float = 10.0 ## 攻击力
+@export var move_speed: float = 50.0 # 移动速度 (单位/秒)
+@export var damage: float = 10.0 # 对桥梁造成的伤害
 
 signal path_finished(enemy: BaseEnemy)
 
-# 节点首次进入场景树时调用。
+@onready var area_2d: Area2D = $Area2D
+
+# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	current_hp = max_hp
 	rotates = false
-
+	
 # Called every physics frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta: float) -> void:
 	var path_node = get_parent()
@@ -38,3 +40,8 @@ func _physics_process(delta: float) -> void:
 		queue_free() # 目前，当敌人到达终点时直接删除。
 	else:
 		progress = new_progress
+
+func _on_area_2d_area_entered(area: Area2D) -> void:
+	if area.owner is Bridge:
+		var bridge: Bridge = area.owner
+		bridge.take_damage(damage)
