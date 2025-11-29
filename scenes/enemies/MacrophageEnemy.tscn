@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bup0nl875wui" path="res://assets/enemies/macrophage.png" id="2_1hdy3"]
 
 [node name="MacrophageEnemy" instance=ExtResource("1_fcx73")]
+damage = 30.0
 
 [node name="Sprite2D" parent="." index="0"]
 texture_filter = 1

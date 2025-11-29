@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://demtebwqwpmn1" path="res://assets/enemies/germ.png" id="2_jd13f"]
 
 [node name="GermEnemy" instance=ExtResource("1_a768d")]
+damage = 15.0
 
 [node name="Sprite2D" parent="." index="0"]
 texture = ExtResource("2_jd13f")
