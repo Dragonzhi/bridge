@@ -12,6 +12,8 @@ var grid_manager: GridManager
 var grid_pos: Vector2i # 存储该桥段在网格中的位置
 var is_destroyed: bool = false
 
+signal bridge_selected(bridge: Bridge)
+
 # 节点首次进入场景树时调用。
 func _ready() -> void:
 	current_health = max_health
@@ -73,7 +75,8 @@ func _on_area_2d_input_event(viewport: Node, event: InputEvent, shape_idx: int) 
 			print("开始修理桥段 %s..." % grid_pos)
 			sprite.modulate = Color(0.2, 0.5, 1.0) # 蓝色表示正在修理
 			repair_timer.start()
-		else:
-			print("点击了桥梁段，位置: ", grid_pos)
+		# 否则，如果桥梁是好的，则发出选中信号
+		elif not is_destroyed:
+			emit_signal("bridge_selected", self)
 		
 		get_viewport().set_input_as_handled() # 阻止事件进一步传播

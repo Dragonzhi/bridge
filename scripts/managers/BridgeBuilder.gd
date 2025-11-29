@@ -6,6 +6,7 @@ const BridgeScene = preload("res://scenes/bridge/bridge.tscn")
 
 var grid_manager: GridManager
 var connection_manager: ConnectionManager
+var ui_manager: Node
 
 # 建造状态
 var build_mode: bool = false
@@ -27,6 +28,10 @@ func _ready() -> void:
 	connection_manager = get_node("/root/Main/ConnectionManager")
 	if not connection_manager:
 		printerr("BridgeBuilder 错误: 找不到 ConnectionManager")
+	
+	ui_manager = get_node("/root/Main/UIManager")
+	if not ui_manager:
+		printerr("BridgeBuilder 错误: 找不到 UIManager")
 
 	if not bridges_container:
 		printerr("BridgeBuilder 错误: 'bridges_container' 未设置！请在编辑器中指定。")
@@ -183,6 +188,7 @@ func _create_bridge_segments():
 	for grid_pos in segments_path:
 		print("创建桥梁段于: ", grid_pos)
 		var bridge_segment = BridgeScene.instantiate()
+		bridge_segment.bridge_selected.connect(ui_manager._on_bridge_selected)
 		var world_pos = grid_manager.grid_to_world(grid_pos)
 		
 		# 将新创建的节点添加到场景树中
