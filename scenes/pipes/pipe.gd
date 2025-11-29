@@ -39,9 +39,9 @@ func _ready() -> void:
 				grid_manager.set_grid_occupied(grid_pos, self)
 	match pipe_type:
 		PipeType.LIFE:
-			pass
+			self.modulate = Color(1,0.1,0)
 		PipeType.SUPPLY:
-			self.modulate = Color(0,1,1)
+			self.modulate = Color(0,0.5,1)
 		PipeType.SIGNAL:
 			self.modulate = Color.YELLOW
 

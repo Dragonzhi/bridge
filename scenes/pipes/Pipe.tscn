@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://bwc7siyf2lmfb"]
 
 [ext_resource type="Script" uid="uid://b8rju1sqpsymi" path="res://scenes/pipes/pipe.gd" id="1_ho2yw"]
-[ext_resource type="Texture2D" uid="uid://5rlhnkseafyk" path="res://assets/pipe/pipe_red_pro.png" id="2_ho2yw"]
+[ext_resource type="Texture2D" uid="uid://bj4m77qx6xhwt" path="res://assets/pipe/pipe_normal_pro.png" id="2_ho2yw"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_faeng"]
 radius = 8.0
