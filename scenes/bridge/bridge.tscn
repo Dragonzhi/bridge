@@ -1,12 +1,9 @@
-[gd_scene load_steps=37 format=3 uid="uid://de0pjmcrfoc5m"]
+[gd_scene load_steps=39 format=3 uid="uid://de0pjmcrfoc5m"]
 
 [ext_resource type="Script" uid="uid://nq74hij6o8fv" path="res://scenes/bridge/bridge.gd" id="1_c301t"]
+[ext_resource type="Texture2D" uid="uid://bkwnyigbpfhsu" path="res://assets/bridge/upLevel/uplevel_sheet.png" id="2_jnwta"]
 [ext_resource type="Texture2D" uid="uid://d35j2wd643idj" path="res://assets/bridge/bridge-sheet.png" id="2_ll4hc"]
 [ext_resource type="Texture2D" uid="uid://cc64e7rt4tt6v" path="res://assets/bridge/bridge_sheet.png" id="3_v3gq5"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_v3gq5"]
-atlas = ExtResource("2_ll4hc")
-region = Rect2(0, 0, 512, 1280)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ypspu"]
 atlas = ExtResource("2_ll4hc")
@@ -246,33 +243,47 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_b42ll"]
+atlas = ExtResource("2_jnwta")
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ll4hc"]
 size = Vector2(16, 16)
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_jnwta"]
+radius = 50.0
+
 [node name="Bridge" type="Node2D"]
 script = ExtResource("1_c301t")
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-visible = false
-scale = Vector2(0.25, 0.25)
-texture = SubResource("AtlasTexture_v3gq5")
-hframes = 4
-vframes = 10
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(0.125, 0.125)
 sprite_frames = SubResource("SpriteFrames_jgw5d")
 animation = &"拐角"
 autoplay = "四向"
+frame = 5
+frame_progress = 1.0
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="UpLevelSprite2D" type="Sprite2D" parent="."]
+position = Vector2(9.536743e-07, 0)
+scale = Vector2(0.1, 0.1)
+texture = SubResource("AtlasTexture_b42ll")
+hframes = 10
+vframes = 10
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="HurtArea2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtArea2D"]
 shape = SubResource("RectangleShape2D_ll4hc")
+
+[node name="HitArea2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitArea2D"]
+shape = SubResource("CircleShape2D_jnwta")
+debug_color = Color(0.49865085, 0.5641095, 0.409438, 0.41960785)
 
 [node name="RepairTimer" type="Timer" parent="."]
 one_shot = true
 
-[connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]
-[connection signal="mouse_entered" from="Area2D" to="." method="_on_area_2d_mouse_entered"]
-[connection signal="mouse_exited" from="Area2D" to="." method="_on_area_2d_mouse_exited"]
+[connection signal="input_event" from="HurtArea2D" to="." method="_on_area_2d_input_event"]
+[connection signal="mouse_entered" from="HurtArea2D" to="." method="_on_area_2d_mouse_entered"]
+[connection signal="mouse_exited" from="HurtArea2D" to="." method="_on_area_2d_mouse_exited"]

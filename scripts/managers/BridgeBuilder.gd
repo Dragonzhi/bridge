@@ -30,7 +30,6 @@ var back_build_index: int = 0
 
 
 func _ready() -> void:
-	# 获取对全局管理器的引用
 	grid_manager = get_node("/root/Main/GridManager")
 	connection_manager = get_node("/root/Main/ConnectionManager")
 	ui_manager = get_node("/root/Main/UIManager")
@@ -42,6 +41,7 @@ func _ready() -> void:
 
 	build_timer.wait_time = build_delay
 	build_timer.timeout.connect(_on_BuildTimer_timeout)
+	get_tree().get_root().mouse_exited.connect(_on_mouse_exited)
 
 # --- Input Handling ---
 
@@ -53,9 +53,23 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _handle_mouse_motion(event: InputEventMouseMotion):
 	var new_grid_pos = grid_manager.world_to_grid(event.position)
-	if current_path.is_empty() or new_grid_pos != current_path.back():
+	if current_path.is_empty() or new_grid_pos == current_path.back():
+		return
+
+	var last_grid_pos = current_path.back()
+	var dx = abs(new_grid_pos.x - last_grid_pos.x)
+	var dy = abs(new_grid_pos.y - last_grid_pos.y)
+
+	# --- FIX: Only allow cardinal (non-diagonal) drawing ---
+	# A move is cardinal if it's one step on one axis and zero on the other.
+	if (dx + dy) == 1:
 		_add_point_to_path(new_grid_pos)
-		_update_preview()
+	# If the mouse jumped several cells, interpolate cardinally.
+	elif (dx > 0 or dy > 0):
+		_interpolate_path_cardinal(last_grid_pos, new_grid_pos)
+	
+	_update_preview()
+
 
 func _handle_left_mouse_release(event: InputEventMouseButton):
 	var grid_pos = grid_manager.world_to_grid(event.position)
@@ -74,6 +88,18 @@ func _add_point_to_path(point: Vector2i):
 	else:
 		current_path.append(point)
 
+func _interpolate_path_cardinal(start: Vector2i, end: Vector2i):
+	var current_pos = start
+	while current_pos != end:
+		var diff = end - current_pos
+		var step = Vector2i.ZERO
+		if abs(diff.x) > abs(diff.y):
+			step.x = sign(diff.x)
+		else:
+			step.y = sign(diff.y)
+		current_pos += step
+		_add_point_to_path(current_pos)
+
 # --- Build Process ---
 
 func start_building(pipe: Pipe, pos: Vector2i):
@@ -87,19 +113,17 @@ func start_building(pipe: Pipe, pos: Vector2i):
 	Input.set_default_cursor_shape(Input.CURSOR_CROSS)
 
 func _finish_building(end_pipe: Pipe, end_pos: Vector2i):
-	if not current_path.has(end_pos): current_path.append(end_pos)
+	if not current_path.has(end_pos): _add_point_to_path(end_pos)
 	
 	var path_to_check = current_path.slice(1, current_path.size() - 1)
 	if not grid_manager.is_grid_available(path_to_check) or start_pipe.pipe_type != end_pipe.pipe_type:
 		_cancel_building()
 		return
 	
-	# --- Setup for Sequential Build ---
 	sequential_build_path = current_path
 	path_connection_set.clear()
 	for pos in sequential_build_path: path_connection_set[pos] = true
 	
-	# Add virtual points for correct auto-tiling at ends
 	if sequential_build_path.size() >= 2:
 		var start_dir = sequential_build_path[0] - sequential_build_path[1]
 		path_connection_set[sequential_build_path[0] + start_dir] = true
@@ -109,23 +133,19 @@ func _finish_building(end_pipe: Pipe, end_pos: Vector2i):
 	front_build_index = 0
 	back_build_index = sequential_build_path.size() - 1
 	
-	# Mark pipes as used and establish connection immediately
 	connection_manager.add_connection(start_pipe, end_pipe)
 	start_pipe.mark_pipe_as_used()
 	end_pipe.mark_pipe_as_used()
 	
-	_reset_build_mode(false) # Reset UI but keep path data for building
+	_reset_build_mode(false)
 	build_timer.start()
 
 func _on_BuildTimer_timeout():
 	var build_finished = false
-	
-	# Build from the front
 	if front_build_index <= back_build_index:
 		_create_single_bridge_segment(sequential_build_path[front_build_index])
 		front_build_index += 1
 	
-	# Build from the back (if not the same segment as the front)
 	if front_build_index -1 != back_build_index:
 		if back_build_index >= front_build_index:
 			_create_single_bridge_segment(sequential_build_path[back_build_index])
@@ -136,7 +156,6 @@ func _on_BuildTimer_timeout():
 
 	if build_finished:
 		build_timer.stop()
-		# Clear build data after completion
 		sequential_build_path.clear()
 		path_connection_set.clear()
 		print("--- 桥梁建造完毕 ---")
