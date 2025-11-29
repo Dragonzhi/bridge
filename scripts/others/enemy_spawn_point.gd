@@ -1,6 +1,6 @@
 extends Node2D
 
-#const EnemySpawnInfo = preload("res://scripts/others/EnemySpawnInfo.gd")
+const EnemySpawnInfo = preload("res://scripts/others/EnemySpawnInfo.gd")
 
 @export var enemy_list: Array[EnemySpawnInfo]
 
@@ -9,6 +9,7 @@ var grid_manager: GridManager
 @onready var path_node: Path2D = $Path
 @onready var spawn_timer: Timer = $SpawnTimer
 @onready var path_visualizer: Line2D = $PathVisualizer # 路径可视化Line2D节点
+var tween: Tween # 用于存储当前活动的Tween
 
 # 节点进入场景树时首次调用。
 func _ready() -> void:
@@ -24,6 +25,7 @@ func _ready() -> void:
 	if path_node and path_node.curve:
 		path_visualizer.points = path_node.curve.get_baked_points()
 	path_visualizer.visible = false # 默认隐藏
+	path_visualizer.modulate.a = 0.0 # 初始透明度为0
 
 func spawn_enemy():
 	if enemy_list.is_empty():
@@ -103,9 +105,22 @@ func _register_occupied_cells():
 	
 	print("敌人生成点在 %s 占用了从 %s 到 %s 的格子" % [global_position, start_grid_pos, end_grid_pos])
 
-
 func _on_area_2d_mouse_entered() -> void:
-	path_visualizer.visible = true # 鼠标进入时显示路径
+	path_visualizer.visible = true
+	
+	if tween and tween.is_running():
+		tween.kill()
+		
+	tween = create_tween()
+	tween.tween_property(path_visualizer, "modulate:a", 1.0, 0.3).set_trans(Tween.TRANS_SINE)
 
 func _on_area_2d_mouse_exited() -> void:
-	path_visualizer.visible = false # 鼠标离开时隐藏路径
+	if tween and tween.is_running():
+		tween.kill()
+
+	tween = create_tween()
+	tween.tween_property(path_visualizer, "modulate:a", 0.0, 0.3).set_trans(Tween.TRANS_SINE)
+	tween.tween_callback(_hide_visualizer)
+
+func _hide_visualizer():
+	path_visualizer.visible = false
